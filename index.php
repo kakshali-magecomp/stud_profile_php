@@ -1,45 +1,97 @@
 <?php
+$errors = [];
+$hobbies = [];
+$terms = "";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    echo "submit";
-    $name = htmlspecialchars($_POST['sname']);
-    echo $name;
-    $email = htmlspecialchars($_POST['semail']);
-    echo $email;
-    $age = htmlspecialchars($_POST['sage']);
-    echo $age;
-    $gender = htmlspecialchars($_POST['sgender']) ?? "";
-    echo $gender;
-    $course = htmlspecialchars($_POST['scourse']);
-    echo $course;
-    $skill = htmlspecialchars($_POST['sskill']) ?? "";
-    echo $skill;
-    if (isset($_POST['Hobbies'])) {
-        $hobbies = $_POST['Hobbies']; 
-    }
-    print_r($hobbies);
+    $name = trim($_POST['sname'] ?? "");
+    $email = trim($_POST['semail'] ?? "");
+    $age = trim($_POST['sage'] ?? "");
+    $gender = $_POST['sgender'] ?? "";
+    $course = $_POST['scourse'] ?? '';
+    $skill = $_POST['sskill'] ?? "";
+    if (!empty($_POST['Hobbies'])) {
+        $hobbies = $_POST['Hobbies'];
+    } 
     if (isset($_POST['Terms'])) {
-        $terms = $_POST['Terms']; 
+        $terms = "checked";
     }
-   print_r($terms);
-    // if (!($name) || !($email) || !($age) || !($gender) || !($course) || !($skill) || count($terms) == 0 || count($hobbies) == 0) {
-    //     echo "<script>alert('All fields are required!');</script>";
-    // } else {
 
-        $student = [
-            "name" => $name,
-            "email" => $email,
-            "age" => $age,
-            "gender" => $gender,
-            "course" => $course,
-            "hobbies" => implode(", ", $hobbies),
-            "skill" => $skill,
-            "terms" => implode(", ", $terms)
-        ];
-        $stu[] = $student;
- 
+    if(empty($name)){
+        $errors['name'] = " !Require";
     }
-// }
+    elseif(is_numeric($name)){
+        $errors['name'] = " !number is not allowd";
+    }
+    elseif(strlen($name) < 2){
+         $errors['name'] = " !Enter Valid Range";
+    }
+    else{
+        $errors['name'] = "";
+    }
+
+    if(empty($email)){
+        $errors['email'] = " !Require";
+    }
+    elseif (!(filter_var($email, FILTER_VALIDATE_EMAIL))) {
+        $errors['email'] = " !Email is not Valid";
+    }
+    else{
+        $errors['email'] = "";
+    }
+
+    if(empty($age)){
+        $errors['age'] = " !Require";
+    }
+    elseif (!($age > 4 && $age < 16)) {
+        $errors['age'] = " !Enter Age Between 5 to 15";
+    }
+    else{
+        $errors['age'] = "";
+    }
+
+    if(empty($gender)){
+        $errors['gender'] = " !Require";
+    }
+    else{
+        $errors['gender'] = "";
+    }
+
+    if (empty($course) || $course == "select") {
+        $errors['course'] = " !Require";
+    }
+    else{
+        $errors['course'] = "";
+    }
+
+    if (empty($hobbies)) {
+        $errors['hobbies'] = " !Require";
+    }
+    else{
+        $errors['hobbies'] = "";
+    }
+
+    if(empty($skill)){
+        $errors['skill'] = " !Require";
+    }
+    else{
+        $errors['skill'] = "";
+    }
+
+    if (empty($terms)) {
+        $errors['terms'] = " !Require";
+    }
+    else{
+        $errors['terms'] = "";
+    }
+
+
+    if (!array_filter($errors)) {
+        header("Location: " . $_SERVER["PHP_SELF"]);
+        exit;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,57 +108,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <form id="sform" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
                 <div>
                 <label>Student Full Name</label>
-                <input type="text" name ="sname" ><span id="demo1"></span><br>
+                <input type="text" name ="sname" value="<?php echo $name; ?>"><span class="error"><?php echo $errors['name']; ?></span>
                 </div>
 
                 <div>
                 <label>Email</label>
-                <input type="text" name="semail" ><span id="demo2"></span><br>
+                <input type="text" name="semail" value="<?php echo $email; ?>"><span class="error"><?php echo $errors['email']; ?></span>
                 </div>
 
                 <div>
                 <label>Age</label>
-                <input type="number" name="sage" ><span id="demo3"></span><br>
+                <input type="number" name="sage" value="<?php echo $age; ?>"><span class="error"><?php echo $errors['age']; ?></span>
                 </div>
 
                 <div>
-                <label>Gender</label><span id="demo4"></span><br>
-                <input type="radio" name="sgender" value="Male" id="Male" class="sgender"><label for="Male">Male</label>
-                <input type="radio" name="sgender" value="Female" id="Female" class="sgender"><label for="Female">Female</label>
-                <input type="radio" name="sgender" value="Other" id="Other" class="sgender"><label for="Other">Other</label><br>
+                <label>Gender</label><span class="error"><?php echo $errors['gender']; ?></span><br>
+                <input type="radio" name="sgender" value="Male" <?= ($gender == 'Male') ? 'checked' : '' ?> id="Male" class="sgender"><label for="Male">Male</label>
+                <input type="radio" name="sgender" value="Female" <?= ($gender == 'Female') ? 'checked' : '' ?> id="Female" class="sgender"><label for="Female">Female</label>
+                <input type="radio" name="sgender" value="Other" <?= ($gender == 'Other') ? 'checked' : '' ?> id="Other" class="sgender"><label for="Other">Other</label><br>
                 </div>
 
                 <div>
                 <label>Course</label>
-                <select id="scourse">
-                    <option value="select" selected>- Select -</option>
-                    <option value="other" >- Other -</option>
-                    <option value="MCA">- BCA -</option>
-                    <option value="MCA">- MCA -</option>
-                    <option value="Deploma">- Deploma -</option>
-                    <option value="B.com">- B.com -</option>
-                    <option value="Other">- M.com -</option>
-                </select><span id="demo5"></span><br>
+                <select name="scourse">
+                    <option value="select" <?php if($course == 'select') echo 'selected'; ?> >- Select -</option>
+                    <option value="Other" <?php if($course == 'Other') echo 'selected'; ?>>- Other -</option>
+                    <option value="BCA" <?php if($course == 'BCA') echo 'selected'; ?>>- BCA -</option>
+                    <option value="MCA" <?php if($course == 'MCA') echo 'selected'; ?>>- MCA -</option>
+                    <option value="Deploma" <?php if($course == 'Deploma') echo 'selected'; ?>>- Deploma -</option>
+                    <option value="B.com" <?php if($course == 'B.com') echo 'selected'; ?>>- B.com -</option>
+                    <option value="M.com" <?php if($course == 'M.com') echo 'selected'; ?>>- M.com -</option>
+                </select><span class="error"><?php echo $errors['course']; ?></span><br>
                 </div>
 
                 <div>
-                <label>Hobbies</label><span id="demo6"></span><br>
-                <input type="checkbox" name="Hobbies[]" value="Reading" id="Reading" class="Hobbies"><label for="Reading">Reading</label>
-                <input type="checkbox" name="Hobbies[]" value="Travelling" id="Travelling" class="Hobbies"><label for="Travelling">Travelling</label>
-                <input type="checkbox" name="Hobbies[]" value="Singing" id="Singing" class="Hobbies"><label for="Singing">Singing</label>
-                <input type="checkbox" name="Hobbies[]" value="Dancing" id="Dancing" class="Hobbies"><label for="Dancing">Dancing</label>
-                <input type="checkbox" name="Hobbies[]" value="Other" id="Otherh" class="Hobbies"><label for="Otherh">Other</label>
+                <label>Hobbies</label><span class="error"><?php echo $errors['hobbies']; ?></span><br>
+                <input type="checkbox" name="Hobbies[]" value="Reading" <?php echo (in_array("Reading", $hobbies)) ? "checked" : ""; ?> id="Reading" class="Hobbies"><label for="Reading">Reading</label>
+                <input type="checkbox" name="Hobbies[]" value="Travelling" <?php echo (in_array("Travelling", $hobbies)) ? "checked" : ""; ?> id="Travelling" class="Hobbies"><label for="Travelling">Travelling</label>
+                <input type="checkbox" name="Hobbies[]" value="Singing" <?php echo (in_array("Singing", $hobbies)) ? "checked" : ""; ?> id="Singing" class="Hobbies"><label for="Singing">Singing</label>
+                <input type="checkbox" name="Hobbies[]" value="Dancing" <?php echo (in_array("Dancing", $hobbies)) ? "checked" : ""; ?> id="Dancing" class="Hobbies"><label for="Dancing">Dancing</label>
+                <input type="checkbox" name="Hobbies[]" value="Other" <?php echo (in_array("Other", $hobbies)) ? "checked" : ""; ?> id="Otherh" class="Hobbies"><label for="Otherh">Other</label>
                 </div>
 
                 <div>
-                <label>Skill Level</label><span id="demo7"></span><br>
-                <input type="radio" name="sskill" value="Beginner" id="Beginner" class="sskill"><label for="Beginner">Beginner</label>
-                <input type="radio" name="sskill" value="Intermediate" id="Intermediate" class="sskill"><label for="Intermediate">Intermediate</label>
-                <input type="radio" name="sskill" value="Advanced" id="Advanced" class="sskill"><label for="Advanced">Advanced</label><br>
+                <label>Skill Level</label><span class="error"><?php echo $errors['skill']; ?></span><br>
+                <input type="radio" name="sskill" value="Beginner" <?= ($skill == 'Beginner') ? 'checked' : '' ?>  id="Beginner" class="sskill"><label for="Beginner">Beginner</label>
+                <input type="radio" name="sskill" value="Intermediate" <?= ($skill == 'Intermediate') ? 'checked' : '' ?> id="Intermediate" class="sskill"><label for="Intermediate">Intermediate</label>
+                <input type="radio" name="sskill" value="Advanced" <?= ($skill == 'Advanced') ? 'checked' : '' ?> id="Advanced" class="sskill"><label for="Advanced">Advanced</label><br>
                 </div>
 
                 <div id="Terms" class="fcenter">
-                <input type="checkbox" name="Terms[]" value="true" id="terms"><label for="terms">Terms and Condition</label><span id="demo8"></span>
+                <input type="checkbox" name="Terms[]" value="true" <?php echo $terms; ?> id="terms"><label for="terms">Terms and Condition</label><span class="error"><?php echo $errors['terms']; ?></span>
                 </div>
 
                 <div class="fcenter">
@@ -115,33 +167,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             </form>
       
-            <table align="center" id="stable">
-                <thead class="thead">
-                    <th>Student Name</th>
-                    <th>Email</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>Course</th>
-                    <th>Hobbies</th>
-                    <th>Skill Level</th>
-                    <th>Terms Accepted</th>
-                </thead>
-                <tbody id="tbody">
-                    <?php foreach ($stu as $s): ?>
-
-                        <tr>
-                            <td><?php echo $s['name']; ?></td>
-                            <td><?php echo $s['email']; ?></td>
-                            <td><?php echo $s['age']; ?></td>
-                            <td><?php echo $s['gender']; ?></td>
-                            <td><?php echo $s['course']; ?></td>
-                            <td><?php echo $s['hobbies']; ?></td>
-                            <td><?php echo $s['skill']; ?></td>
-                            <td><?php echo $s['terms']; ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
     </div>
 </body>
 </html>
